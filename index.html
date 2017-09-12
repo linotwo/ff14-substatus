@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>FF14 4.0 サブステータス計算ツール</title>
+<style>
+body {
+	background-color: #202020;
+	color: #CCCCCC;
+	font-family: "ＭＳ ゴシック", sans-serif;
+	font-size: 12pt;
+	margin: 25pt;
+}
+.main {
+	width: 100%;
+	text-align: center;
+}
+.main div {
+	margin: 0 auto;
+	text-align: left;
+	padding: 8pt;
+}
+span.ratio {
+	color: #FFFFFF;
+}
+table, th, td {
+	border: 1pt solid #202020;
+	border-collapse: collapse;
+}
+table.results {
+	border: 2pt solid #574A30;
+	margin-top: 12pt;
+	margin-bottom: 12pt;
+}
+table {
+	width: 100%;
+}
+caption {
+	margin: 4pt;
+}
+th, td {
+	padding: 3pt;
+}
+th {
+	color: #BBAC94;
+	text-align: center;
+}
+th.type {
+	color: #666666;
+	font-size: 11pt;
+	text-align: center;
+}
+td.status {
+	color: #BBAC94;
+	text-align: left;
+}
+td.val {
+	background-color: #404040;
+	text-align: right;
+	padding: 0pt;
+}
+td.val2, td.val3 {
+	text-align: right;
+}
+td.val2 {
+	background-color: #303030;
+}
+td.val3 {
+	background-color: #202020;
+}
+input {
+	background-color: transparent;
+	border: 0pt solid transparent;
+	color: #C0C0C0;
+	width: 50pt;
+	text-align: right;
+	text-decoration: none;
+	font-family: "ＭＳ ゴシック", sans-serif;
+	font-size: 12pt;
+	padding: 3pt;
+	display: inline;
+	margin: 0;
+}
+input::-ms-clear {
+	display: none;
+}
+.button1 {
+	width: 100%;
+	padding: 2pt;
+	text-align: center;
+	text-decoration: none;
+	font-family: "ＭＳ ゴシック", sans-serif;
+	font-size: 10pt;
+	display: block;
+	cursor: pointer;
+}
+hr {
+	color: #303030;
+	border-style: solid;
+}
+</style>
+</head>
+<body>
+<div class="main">
+<div id="params" style="width: 175pt;">
+<table>
+	<tr>
+		<td class="status" title="Critical Hit Rate" style="width:100%;">クリティカル</td>
+		<td class="val"><input id="input0" onclick="input_on_click(this)" onfocus="input_on_focus(this, 0)" onblur="to_int(this)" type="text" class="param" maxlength="4" value="364" /></td>
+	</tr>
+	<tr>
+		<td class="status" title="Determination">意思力</td>
+		<td class="val"><input id="input1" onclick="input_on_click(this)" onfocus="input_on_focus(this, 1)" onblur="to_int(this)" type="text" class="param" maxlength="4" value="292" /></td>
+	</tr>
+	<tr>
+		<td class="status" title="Direct Hit Rate">ダイレクトヒット</td>
+		<td class="val"><input id="input2" onclick="input_on_click(this)" onfocus="input_on_focus(this, 2)" onblur="to_int(this)" type="text" class="param" maxlength="4" value="364" /></td>
+	</tr>
+	<tr>
+		<td class="status" title="Skill Speed/Spell Speed">スキスピ/スペスピ</td>
+		<td class="val"><input id="input3" onclick="input_on_click(this)" onfocus="input_on_focus(this, 3)" onblur="to_int(this)" type="text" class="param" maxlength="4" value="364" /></td>
+	</tr>
+</table>
+<table style="margin-top: 12pt;">
+	<tr>
+		<th class="type" style="text-align: left; width:100%;">ダメージタイプ</th>
+		<th class="type" style="text-align: right;">％</th>
+	</tr>
+	<tr>
+		<td class="status" title="倍率がSSに影響される">DoT/AA</td>
+		<td class="val"><input id="input4" onclick="input_on_click(this)" onfocus="input_on_focus(this, 4)" onchange="calc_ratio(this, 0)" type="text" class="param" maxlength="8" value="0" /></td>
+	</tr>
+	<tr>
+		<td class="status" title="回数がGCDに影響される">WS/魔法</td>
+		<td class="val"><input id="input5" onclick="input_on_click(this)" onfocus="input_on_focus(this, 5)" onchange="calc_ratio(this, 1)" type="text" class="param" maxlength="8" value="0" /></td>
+	</tr>
+	<tr>
+		<td class="status">他</td>
+		<td id="result0" class="val2">100</td>
+	</tr>
+</table>
+</div>
+<div style="width: 175pt;"><button id="calc" class="button1" onclick="calc()">計算する</button></div>
+<div style="width: 350pt;"><p id="result1"></p></div>
+</div>
+
+<script>
+
+function select_all(input)
+{
+	input.setSelectionRange(0, input.value.length);
+}
+
+function to_int(input)
+{
+	var temp = parseInt(input.value, 10);
+	input.value = isNaN(temp)? 0: temp;
+}
+
+function to_float(input)
+{
+	var temp = parseFloat(input.value, 10).toFixed(2);
+	input.value = isNaN(temp)? 0: temp;
+}
+
+function clamp(val, min, max)
+{
+	return Math.min(Math.max(val, min), max);
+}
+
+function calc_ratio(input, idx)
+{
+	to_float(input);
+	var target = [
+		document.getElementById("input4"),
+		document.getElementById("input5"),
+		document.getElementById("result0")
+	]
+	target[0].value = clamp(target[0].value, 0, 100);
+	target[1].value = clamp(target[1].value, 0, 100);
+	if(idx == 0)
+	{
+		target[1].value = Number(clamp(target[1].value, 0, 100 - target[0].value).toFixed(2));
+	}
+	else if(idx == 1)
+	{
+		target[0].value = Number(clamp(target[0].value, 0, 100 - target[1].value).toFixed(2));
+	}
+	var result = (100 - target[0].value - target[1].value);
+	target[2].innerText = Number(result.toFixed(2));
+}
+
+var inputIdx = 0;
+var inputCount = 6;
+var delaySelect = false;
+var mouseDown = false;
+var lastValue;
+var lastResult;
+
+document.addEventListener("mousedown", function(event) {
+	if(event.button == 0)
+	{
+		mouseDown = true;
+		delaySelect = false;
+	}
+})
+
+document.addEventListener("mouseup", function(event) {
+	if(event.button == 0)
+	{
+		mouseDown = false;
+	}
+})
+
+document.addEventListener("DOMContentLoaded", function(event) {
+	var target = [
+		document.getElementById("input4"),
+		document.getElementById("input5"),
+		document.getElementById("result0")
+	]
+	target[2].innerText = Number((100 - target[0].value - target[1].value).toFixed(2));
+	mouseDown = false;
+	lastResult = "";
+})
+
+function input_on_focus(input, idx)
+{
+	inputIdx = idx;
+	lastValue = input.value;
+	if(!mouseDown)
+		select_all(input);
+	else
+		delaySelect = true;
+}
+
+function input_on_click(input)
+{
+	if(delaySelect)
+	{
+		select_all(input);
+		delaySelect = false;
+	}
+}
+
+var params = document.getElementById("params");
+
+params.onkeydown = function(event)
+{
+	if(event.keyCode == 13)
+	{
+		if(++inputIdx >= inputCount)
+		{
+			document.getElementById("input" + (inputCount - 1)).setSelectionRange(0, 0);
+			document.getElementById("calc").focus();
+			if(event.preventDefault)
+				event.preventDefault();
+			else
+				event.returnValue = false;
+			return;
+		}
+		var target = document.getElementById("input" + inputIdx);
+		target.focus();
+		select_all(target);
+		return;
+	}
+	if(event.keyCode == 27)
+	{
+		document.activeElement.setSelectionRange(0, 0);
+		document.activeElement.value = lastValue;
+		document.getElementById("calc").focus();
+		if(event.preventDefault)
+			event.preventDefault();
+		else
+			event.returnValue = false;
+		return;
+	}
+}
+
+function ROUNDDOWN(number, num_digits)
+{
+	var scale = Math.pow(10, num_digits);
+	return Math.floor(scale * number) / scale;
+}
+
+function calcRatioNoSs(cri, det, dh)
+{
+	var ret = 1.0;
+	var criRate = (0.05 + ((cri - 364) * 0.000092));
+	var criDmg = (0.4 + (cri - 364) * 0.000092);
+	ret *= 1.0 + criRate * criDmg;
+	ret *= 1.0 + ((det - 292) * 0.0000592);
+	ret *= 1.0 + (((dh - 364) * 0.000251) * 0.25);
+	return ret;
+}
+
+function calcRatioDot(cri, det, dh, ss)
+{
+	var ret = 1.0;
+	var criRate = (0.05 + ((cri - 364) * 0.000092));
+	var criDmg = (0.4 + (cri - 364) * 0.000092);
+	ret *= 1.0 + criRate * criDmg;
+	ret *= 1.0 + ((det - 292) * 0.0000592);
+	ret *= 1.0 + (((dh - 364) * 0.000251) * 0.25);
+	ret *= 1.0 + ((ss - 364) * 0.000057);
+	return ret;
+}
+
+function calcRatioGcd(cri, det, dh, ss)
+{
+	var ret = 1.0;
+	var criRate = (0.05 + ((cri - 364) * 0.000092));
+	var criDmg = (0.4 + (cri - 364) * 0.000092);
+	ret *= 1.0 + criRate * criDmg;
+	ret *= 1.0 + ((det - 292) * 0.0000592);
+	ret *= 1.0 + (((dh - 364) * 0.000251) * 0.25);
+	ret *= 2.5 / ROUNDDOWN(2.5025 * (1.0 - (ss - 364) * 0.059848 / 1000.0), 2);
+	return ret;
+}
+
+function calcRatioGcd2(cri, det, dh, ss)
+{
+	var ret = 1.0;
+	var criRate = (0.05 + ((cri - 364) * 0.000092));
+	var criDmg = (0.4 + (cri - 364) * 0.000092);
+	ret *= 1.0 + criRate * criDmg;
+	ret *= 1.0 + ((det - 292) * 0.0000592);
+	ret *= 1.0 + (((dh - 364) * 0.000251) * 0.25);
+	ret *= 2.5 / (2.5025 * (1.0 - (ss - 364) * 0.059848 / 1000.0));
+	return ret;
+}
+
+function calcRatioMix(cri, det, dh, ss, dot, gcd)
+{
+	var rest = 1.0 - dot - gcd;
+	return rest * calcRatioNoSs(cri, det, dh) + dot * calcRatioDot(cri, det, dh, ss) + gcd * calcRatioGcd(cri, det, dh, ss);
+}
+
+function calcRatioMix2(cri, det, dh, ss, dot, gcd)
+{
+	var rest = 1.0 - dot - gcd;
+	return rest * calcRatioNoSs(cri, det, dh) + dot * calcRatioDot(cri, det, dh, ss) + gcd * calcRatioGcd2(cri, det, dh, ss);
+}
+
+function calcDerivativeDot(cri, det, dh, ss, scale, unit)
+{
+	var base = calcRatioDot(cri, det, dh, ss);
+	var dCri = scale * (calcRatioDot(cri + unit, det, dh, ss) - base);
+	var dDet = scale * (calcRatioDot(cri, det + unit, dh, ss) - base);
+	var dDh = scale * (calcRatioDot(cri, det, dh + unit, ss) - base);
+	var dSs = scale * (calcRatioDot(cri, det, dh, ss + unit) - base);
+	return [dCri, dDet, dDh, dSs];
+}
+
+function calcDerivativeGcd(cri, det, dh, ss, scale, unit)
+{
+	var base = calcRatioGcd(cri, det, dh, ss);
+	var dCri = scale * (calcRatioGcd(cri + unit, det, dh, ss) - base);
+	var dDet = scale * (calcRatioGcd(cri, det + unit, dh, ss) - base);
+	var dDh = scale * (calcRatioGcd(cri, det, dh + unit, ss) - base);
+	var dSs = scale * (calcRatioGcd2(cri, det, dh, ss + unit) - calcRatioGcd2(cri, det, dh, ss));
+	return [dCri, dDet, dDh, dSs];
+}
+
+function calcDerivativeMix(cri, det, dh, ss, dot, gcd, scale, unit)
+{
+	var base = calcRatioMix(cri, det, dh, ss, dot, gcd);
+	var dCri = scale * (calcRatioMix(cri + unit, det, dh, ss, dot, gcd) - base);
+	var dDet = scale * (calcRatioMix(cri, det + unit, dh, ss, dot, gcd) - base);
+	var dDh = scale * (calcRatioMix(cri, det, dh + unit, ss, dot, gcd) - base);
+	var dSs = scale * (calcRatioMix2(cri, det, dh, ss + unit, dot, gcd) - calcRatioMix2(cri, det, dh, ss, dot, gcd));
+	return [dCri, dDet, dDh, dSs];
+}
+
+function calc()
+{
+	var dot = Number(document.getElementById("input4").value) / 100;
+	var gcd = Number(document.getElementById("input5").value) / 100;
+	var cri = Number(document.getElementById("input0").value);
+	var det = Number(document.getElementById("input1").value);
+	var dh = Number(document.getElementById("input2").value);
+	var ss = Number(document.getElementById("input3").value);
+	
+	var totalPoint = cri + det + dh + ss;
+	var scale = 100.0;
+	var ratioMix = scale * calcRatioMix(cri, det, dh, ss, dot, gcd);
+	var ratioDot = scale * calcRatioDot(cri, det, dh, ss);
+	var ratioGcd = scale * calcRatioGcd(cri, det, dh, ss);
+	var unit = 40;
+	var derivativeMix = calcDerivativeMix(cri, det, dh, ss, dot, gcd, scale, unit);
+	var derivativeDot = calcDerivativeDot(cri, det, dh, ss, scale, unit);
+	var derivativeGcd = calcDerivativeGcd(cri, det, dh, ss, scale, unit);
+
+	resultHTML = "<p style='text-align:center;'><span style='color: #BBAC94;'>合計</span> " + totalPoint + "</p>"
+		+ "<table class='results'>"
+		+ "<tr><th colspan='3' width='40%'></th><th>DoT/AA</th><th>WS/魔法</th><th>総合</th></tr>"
+		+ "<tr><th colspan='3'>割合</th><td class='val3'>" + (dot * 100).toFixed(2) + "%</td><td class='val3'>" + (gcd * 100).toFixed(2) + "%</td><td class='val3'>100.00%</td></tr>"
+		+ "<tr><th colspan='3'>ダメージ倍率</th><td class='val2'>" + ratioDot.toFixed(4) + "%</td><td class='val2'>" + ratioGcd.toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + ratioMix.toFixed(4) + "</span>%</td></tr>"
+		+ "<tr><th rowspan='4' width='20%'>変化率<br />" + unit + "ｱﾀﾘ</th><td class='status'>クリ</td><td class='val3'>" + cri + "</td><td class='val2'>" + derivativeDot[0].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[0].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[0].toFixed(4) + "</span>%</td></tr>"
+		+ "<tr><td class='status'>意思</td><td class='val3'>" + det + "</td><td class='val2'>" + derivativeDot[1].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[1].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[1].toFixed(4) + "</span>%</td></tr>"
+		+ "<tr><td class='status'>DH</td><td class='val3'>" + dh + "</td><td class='val2'>" + derivativeDot[2].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[2].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[2].toFixed(4) + "</span>%</td></tr>"
+		+ "<tr><td class='status'>SS</td><td class='val3'>" + ss + "</td><td class='val2'>" + derivativeDot[3].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[3].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[3].toFixed(4) + "</span>%</td></tr>"
+		+ "</table>";
+
+	document.getElementById("result1").innerHTML = resultHTML + lastResult;
+
+	lastResult = "<hr>" + resultHTML;
+}
+
+</script>
+</body>
+</html>
