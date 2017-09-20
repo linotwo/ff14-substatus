@@ -166,6 +166,7 @@ hr {
 
 function select_all(input)
 {
+	input.setSelectionRange(0, 0);
 	input.setSelectionRange(0, input.value.length);
 }
 
