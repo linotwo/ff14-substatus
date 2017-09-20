@@ -453,7 +453,7 @@ function renderResult(idx, totalPoint, dot, gcd, cri, det, dh, ss, ratioDot, rat
 		+ "<tr><td class='val2'>" + (dhRate * 100).toFixed(2) + "%</td><td class='val2'>125.00%</td></tr>"
 		+ "<tr><th colspan='2'>GCD/SS閾</th></tr>"
 		+ "<tr><td colspan='2' class='val2' style='text-align: center;'>" + gcdStatus[0].toFixed(2) + "s</td></tr>"
-		+ "<tr><td colspan='2' class='val2' style='text-align: center;'>" + gcdStatus[1] + "<span style='color: #707070;'>≤</span>" + ss + "<span style='color: #707070;'><</span>" + gcdStatus[2] + "</td></tr>"
+		+ "<tr><td colspan='2' class='val2' style='text-align: center;'><span title='SS-" + (ss - gcdStatus[1]) +"'>" + gcdStatus[1] + "</span><span style='color: #707070;'>≤</span>" + ss + "<span style='color: #707070;'><</span><span title='SS+" + (gcdStatus[2] - ss) +"'>" + gcdStatus[2] + "</span></td></tr>"
 		+ "</tbody>"
 		+ "</table></td>"
 		+ "<td class='result_wrapper_cell' style='width: 2pt;'></td>"
