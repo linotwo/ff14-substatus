@@ -39,8 +39,15 @@ table, th, td {
 }
 table.results {
 	border: 2pt solid #574A30;
+}
+table.result_wrapper {
+	border: 0;
 	margin-top: 12pt;
 	margin-bottom: 12pt;
+}
+td.result_wrapper_cell {
+	border: 0;
+	padding: 0;
 }
 table {
 	width: 100%;
@@ -152,7 +159,7 @@ hr {
 </table>
 </div>
 <div style="width: 175pt;"><button id="calc" class="button1" onclick="calc()">計算する</button></div>
-<div style="width: 350pt;"><p id="result1"></p></div>
+<div style="width: 425pt;"><p id="result1"></p></div>
 </div>
 
 <script>
@@ -328,7 +335,7 @@ function ROUNDDOWN(number, num_digits)
 function calcRatioNoSs(cri, det, dh)
 {
 	var ret = 1.0;
-	var criRate = (0.05 + ((cri - 364) * 0.000092));
+	var criRate = (0.05 + (cri - 364) * 0.000092);
 	var criDmg = (0.4 + (cri - 364) * 0.000092);
 	ret *= 1.0 + criRate * criDmg;
 	ret *= 1.0 + ((det - 292) * 0.0000592);
@@ -339,7 +346,7 @@ function calcRatioNoSs(cri, det, dh)
 function calcRatioDot(cri, det, dh, ss)
 {
 	var ret = 1.0;
-	var criRate = (0.05 + ((cri - 364) * 0.000092));
+	var criRate = (0.05 + (cri - 364) * 0.000092);
 	var criDmg = (0.4 + (cri - 364) * 0.000092);
 	ret *= 1.0 + criRate * criDmg;
 	ret *= 1.0 + ((det - 292) * 0.0000592);
@@ -351,7 +358,7 @@ function calcRatioDot(cri, det, dh, ss)
 function calcRatioGcd(cri, det, dh, ss)
 {
 	var ret = 1.0;
-	var criRate = (0.05 + ((cri - 364) * 0.000092));
+	var criRate = (0.05 + (cri - 364) * 0.000092);
 	var criDmg = (0.4 + (cri - 364) * 0.000092);
 	ret *= 1.0 + criRate * criDmg;
 	ret *= 1.0 + ((det - 292) * 0.0000592);
@@ -363,7 +370,7 @@ function calcRatioGcd(cri, det, dh, ss)
 function calcRatioGcd2(cri, det, dh, ss)
 {
 	var ret = 1.0;
-	var criRate = (0.05 + ((cri - 364) * 0.000092));
+	var criRate = (0.05 + (cri - 364) * 0.000092);
 	var criDmg = (0.4 + (cri - 364) * 0.000092);
 	ret *= 1.0 + criRate * criDmg;
 	ret *= 1.0 + ((det - 292) * 0.0000592);
@@ -414,20 +421,52 @@ function calcDerivativeMix(cri, det, dh, ss, dot, gcd, scale, unit)
 	return [dCri, dDet, dDh, dSs];
 }
 
-function renderResult(idx, totalPoint, dot, gcd, cri, det, dh, ss, ratioDot, ratioGcd, ratioMix, derivativeDot, derivativeGcd, derivativeMix, unit)
+function findGcdThreshold(ss)
 {
-	return "<table class='results'>"
+	var gcdPeriod = ROUNDDOWN(2.5025 * (1.0 - (ss - 364) * 0.059848 / 1000.0), 2);
+	var current, next;
+	{
+		var val = ss;
+		while(ROUNDDOWN(2.5025 * (1.0 - (val - 364) * 0.059848 / 1000.0), 2) == gcdPeriod)
+			--val;
+		current = val + 1;
+	}
+	{
+		var val = ss;
+		while(ROUNDDOWN(2.5025 * (1.0 - (val - 364) * 0.059848 / 1000.0), 2) == gcdPeriod)
+			++val;
+		next = val;
+	}
+	return [gcdPeriod, current, next];
+}
+
+function renderResult(idx, totalPoint, dot, gcd, cri, det, dh, ss, ratioDot, ratioGcd, ratioMix, derivativeDot, derivativeGcd, derivativeMix, unit, criRate, criDmg, dhRate, gcdStatus)
+{
+	return "<table class='result_wrapper'><tbody>"
 		+ "<caption id='pin_button_" + idx + "' style='text-align: right;' onclick='pin_on_click(" + idx + ")'></caption>"
+		+ "<tr><td class='result_wrapper_cell' style='width: 100pt;'><table class='results'>"
 		+ "<tbody>"
-		+ "<tr><td colspan='3' width='40%' style='background-color: #101010; text-align: center;'><span style='color: #BBAC94;'>サブステ合計</span> " + totalPoint + "</td><th>DoT/AA</th><th>WS/魔法</th><th>総合</th></tr>"
+		+ "<tr><th colspan='2'>クリ率/倍率</th></tr>"
+		+ "<tr><td class='val2' style='width: 50%;'>" + (criRate * 100).toFixed(2) + "%</td><td class='val2'>" + (100 + criDmg * 100).toFixed(2) + "%</td></tr>"
+		+ "<tr><th colspan='2'>DH率/倍率</th></tr>"
+		+ "<tr><td class='val2'>" + (dhRate * 100).toFixed(2) + "%</td><td class='val2'>125.00%</td></tr>"
+		+ "<tr><th colspan='2'>GCD/SS閾</th></tr>"
+		+ "<tr><td colspan='2' class='val2' style='text-align: center;'>" + gcdStatus[0].toFixed(2) + "s</td></tr>"
+		+ "<tr><td colspan='2' class='val2' style='text-align: center;'>" + gcdStatus[1] + "<span style='color: #707070;'>≤</span>" + ss + "<span style='color: #707070;'><</span>" + gcdStatus[2] + "</td></tr>"
+		+ "</tbody>"
+		+ "</table></td>"
+		+ "<td class='result_wrapper_cell' style='width: 2pt;'></td>"
+		+ "<td class='result_wrapper_cell'><table class='results'>"
+		+ "<tbody>"
+		+ "<tr><td colspan='3' style='background-color: #101010; text-align: center;'><span style='color: #BBAC94;'>サブステ合計</span> " + totalPoint + "</td><th style='width: 60pt;'>DoT/AA</th><th style='width: 60pt;'>WS/魔法</th><th style='width: 60pt;'>総合</th></tr>"
 		+ "<tr><th colspan='3'>割合</th><td class='val3'>" + (dot * 100).toFixed(2) + "%</td><td class='val3'>" + (gcd * 100).toFixed(2) + "%</td><td class='val3'>100.00%</td></tr>"
-		+ "<tr><th colspan='3'>ダメージ倍率</th><td class='val2'>" + ratioDot.toFixed(4) + "%</td><td class='val2'>" + ratioGcd.toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + ratioMix.toFixed(4) + "</span>%</td></tr>"
-		+ "<tr><th rowspan='4' width='20%'>変化率<br />" + unit + "ｱﾀﾘ</th><td class='status'>クリ</td><td class='val3'>" + cri + "</td><td class='val2'>" + derivativeDot[0].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[0].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[0].toFixed(4) + "</span>%</td></tr>"
+		+ "<tr><th colspan='3'>DPS倍率</th><td class='val2'>" + ratioDot.toFixed(4) + "%</td><td class='val2'>" + ratioGcd.toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + ratioMix.toFixed(4) + "</span>%</td></tr>"
+		+ "<tr><th rowspan='4'>変化率<br />" + unit + "ｱﾀﾘ</th><td class='status'>クリ</td><td class='val3' style='width: 25pt;'>" + cri + "</td><td class='val2'>" + derivativeDot[0].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[0].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[0].toFixed(4) + "</span>%</td></tr>"
 		+ "<tr><td class='status'>意思</td><td class='val3'>" + det + "</td><td class='val2'>" + derivativeDot[1].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[1].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[1].toFixed(4) + "</span>%</td></tr>"
 		+ "<tr><td class='status'>DH</td><td class='val3'>" + dh + "</td><td class='val2'>" + derivativeDot[2].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[2].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[2].toFixed(4) + "</span>%</td></tr>"
 		+ "<tr><td class='status'>SS</td><td class='val3'>" + ss + "</td><td class='val2'>" + derivativeDot[3].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[3].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[3].toFixed(4) + "</span>%</td></tr>"
 		+ "</tbody>"
-		+ "</table>";
+		+ "</table></td></tr></tbody></table>";
 }
 
 function allocIdx()
@@ -491,7 +530,14 @@ function calc()
 	var derivativeDot = calcDerivativeDot(cri, det, dh, ss, scale, unit);
 	var derivativeGcd = calcDerivativeGcd(cri, det, dh, ss, scale, unit);
 
-	resultHTML = renderResult(tempIdx, totalPoint, dot, gcd, cri, det, dh, ss, ratioDot, ratioGcd, ratioMix, derivativeDot, derivativeGcd, derivativeMix, unit);
+	var criRate = (0.05 + (cri - 364) * 0.000092);
+	var criDmg = (0.4 + (cri - 364) * 0.000092);
+	var dhRate = ((dh - 364) * 0.000251);
+	var gcdStatus;
+	
+	gcdStatus = findGcdThreshold(ss);
+	
+	resultHTML = renderResult(tempIdx, totalPoint, dot, gcd, cri, det, dh, ss, ratioDot, ratioGcd, ratioMix, derivativeDot, derivativeGcd, derivativeMix, unit, criRate, criDmg, dhRate, gcdStatus);
 
 	resultHTMLList.push({idx: tempIdx, html: resultHTML});
 
