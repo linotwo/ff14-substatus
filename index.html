@@ -121,19 +121,19 @@ hr {
 	<tbody>
 	<tr>
 		<td class="status" title="Critical Hit Rate" style="width:100%;">クリティカル</td>
-		<td class="val"><input id="input0" onclick="input_on_click(this)" onfocus="input_on_focus(this, 0)" onblur="to_int(this)" type="text" class="param" maxlength="4" value="364" /></td>
+		<td class="val" title="+/-を付けると加算になる"><input id="input0" onclick="input_on_click(this)" onfocus="input_on_focus(this, 0)" onblur="to_int(this, 364)" type="text" class="param" maxlength="5" value="364" /></td>
 	</tr>
 	<tr>
 		<td class="status" title="Determination">意思力</td>
-		<td class="val"><input id="input1" onclick="input_on_click(this)" onfocus="input_on_focus(this, 1)" onblur="to_int(this)" type="text" class="param" maxlength="4" value="292" /></td>
+		<td class="val" title="+/-を付けると加算になる"><input id="input1" onclick="input_on_click(this)" onfocus="input_on_focus(this, 1)" onblur="to_int(this, 292)" type="text" class="param" maxlength="5" value="292" /></td>
 	</tr>
 	<tr>
 		<td class="status" title="Direct Hit Rate">ダイレクトヒット</td>
-		<td class="val"><input id="input2" onclick="input_on_click(this)" onfocus="input_on_focus(this, 2)" onblur="to_int(this)" type="text" class="param" maxlength="4" value="364" /></td>
+		<td class="val" title="+/-を付けると加算になる"><input id="input2" onclick="input_on_click(this)" onfocus="input_on_focus(this, 2)" onblur="to_int(this, 364)" type="text" class="param" maxlength="5" value="364" /></td>
 	</tr>
 	<tr>
 		<td class="status" title="Skill Speed/Spell Speed">スキスピ/スペスピ</td>
-		<td class="val"><input id="input3" onclick="input_on_click(this)" onfocus="input_on_focus(this, 3)" onblur="to_int(this)" type="text" class="param" maxlength="4" value="364" /></td>
+		<td class="val" title="+/-を付けると加算になる"><input id="input3" onclick="input_on_click(this)" onfocus="input_on_focus(this, 3)" onblur="to_int(this, 364)" type="text" class="param" maxlength="5" value="364" /></td>
 	</tr>
 	</tbody>
 </table>
@@ -164,27 +164,29 @@ hr {
 
 <script>
 
+function clamp(val, min, max)
+{
+	return Math.min(Math.max(val, min), max);
+}
+
 function select_all(input)
 {
 	input.setSelectionRange(0, 0);
 	input.setSelectionRange(0, input.value.length);
 }
 
-function to_int(input)
+function to_int(input, min)
 {
+	var ch = input.value.substr(0, 1);
+	var isDiff = (ch == "+" || ch == "-");
 	var temp = parseInt(input.value, 10);
-	input.value = isNaN(temp)? 0: temp;
+	input.value = isNaN(temp)? lastValue: clamp((isDiff? (Number(lastValue) + Number(temp)): temp), min, 9999);
 }
 
 function to_float(input)
 {
 	var temp = parseFloat(input.value, 10).toFixed(2);
 	input.value = isNaN(temp)? 0: temp;
-}
-
-function clamp(val, min, max)
-{
-	return Math.min(Math.max(val, min), max);
 }
 
 function calc_ratio(input, idx)
