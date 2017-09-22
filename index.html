@@ -9,11 +9,12 @@ body {
 	color: #CCCCCC;
 	font-family: "ＭＳ ゴシック", sans-serif;
 	font-size: 12pt;
-	margin: 25pt;
+	margin: 0;
 }
 .main {
 	width: 100%;
 	text-align: center;
+	margin-top: 8pt;
 }
 .main div {
 	margin: 0 auto;
@@ -33,9 +34,38 @@ span.pin_on {
 	text-shadow: -1px 0 #574A30, 0 1px #574A30, 1px 0 #574A30, 0 -1px #574A30;
 	cursor: pointer;
 }
+.top_button_off, .top_button_on {
+	display: block;
+	padding: 2pt;
+	width: 150pt;
+	text-align: center;
+}
+.top_button_off {
+	border: 1pt solid #303030;
+	color: #303030;
+	cursor: default;
+}
+.top_button_on {
+	border: 1pt solid #574A30;
+	color: #574A30;
+	cursor: pointer;
+}
+.top_button_on:hover {
+	color: #BBAC94;
+}
+.top_button_off, .top_button_on, span.pin_off, span.pin_on {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	white-space: nowrap;
+}
 table, th, td {
 	border: 1pt solid #202020;
 	border-collapse: collapse;
+	background-clip: padding-box;
 }
 table.results {
 	border: 2pt solid #574A30;
@@ -115,6 +145,7 @@ hr {
 </style>
 </head>
 <body>
+<div id="update_url_button" style="height: 18pt;"></div>
 <div class="main">
 <div id="params" style="width: 175pt;">
 <table>
@@ -158,7 +189,7 @@ hr {
 	</tbody>
 </table>
 </div>
-<div style="width: 175pt;"><button id="calc" class="button1" onclick="calc()">計算する</button></div>
+<div style="width: 175pt;"><button id="calc" class="button1" onclick="calc_input()">計算する</button></div>
 <div style="width: 425pt;"><p id="result1"></p></div>
 </div>
 
@@ -220,6 +251,20 @@ var pinArray = [];
 var pinCount = 0;
 var maxResultCount = 10;
 var unusedIdxArray = [];
+var isUrlValidated = false;
+
+var update_url_off_html = "<div class='top_button_off'>アドレスバーを更新する</div>";
+var update_url_on_html = "<div class='top_button_on' onmousedown='top_button_down(this)' onmouseup='top_button_up(this)' onclick='update_url()'>アドレスバーを更新する</div>";
+
+function top_button_down(button)
+{
+	button.style["padding"] = "3pt 1pt 1pt 3pt";
+}
+
+function top_button_up(button)
+{
+	button.style["padding"] = "2pt";
+}
 
 document.addEventListener("mousedown", function(event) {
 	if(event.button == 0)
@@ -237,22 +282,57 @@ document.addEventListener("mouseup", function(event) {
 })
 
 document.addEventListener("DOMContentLoaded", function(event) {
+	mouseDown = false;
+	pinArray = [];
+	unusedIdxArray = [];
+	for(var i = 0; i < maxResultCount; ++i)
+	{
+		unusedIdxArray.push(i);
+		pinArray.push(false);
+	}
+	pinCount = 0;
+	isUrlValidated = false;
+	if(location.search.length > 0)
+	{
+		var resultList = location.search.substr(1).split("&");
+		for(var i = 0; i < resultList.length; ++i)
+		{
+			console.log(resultList[i]);
+			var paramList = resultList[i].split(",");
+			if(paramList.length != 7)
+				continue;
+			var dot = Number(paramList[0]) / 10000;
+			var gcd = Number(paramList[1]) / 10000;
+			var cri = Number(paramList[2]);
+			var det = Number(paramList[3]);
+			var dh = Number(paramList[4]);
+			var ss = Number(paramList[5]);
+			var pin = Number(paramList[6]);
+			if(isNaN(dot) || isNaN(gcd) || isNaN(cri) || isNaN(det) || isNaN(dh) || isNaN(ss) || isNaN(pin))
+				continue;
+
+			calc(dot, gcd, cri, det, dh, ss, pin);
+
+			if(i == resultList.length - 1)
+			{
+				document.getElementById("input4").value = dot * 100;
+				document.getElementById("input5").value = gcd * 100;
+				document.getElementById("input0").value = cri;
+				document.getElementById("input1").value = det;
+				document.getElementById("input2").value = dh;
+				document.getElementById("input3").value = ss;
+			}
+		}
+	}
+
 	var target = [
 		document.getElementById("input4"),
 		document.getElementById("input5"),
 		document.getElementById("result0")
 	]
 	target[2].innerText = Number((100 - target[0].value - target[1].value).toFixed(2));
-	mouseDown = false;
-	pinArray = [];
-	unusedIdxArray = [];
-	var i;
-	for(i = 0; i < maxResultCount; ++i)
-	{
-		unusedIdxArray.push(i);
-		pinArray.push(false);
-	}
-	pinCount = 0;
+
+	document.getElementById("update_url_button").innerHTML = update_url_off_html;
 })
 
 function input_on_focus(input, idx)
@@ -293,6 +373,7 @@ function pin_on_click(idx)
 	pinArray[idx] = !pinArray[idx];
 
 	document.getElementById("calc").disabled = (pinCount == maxResultCount);
+	document.getElementById("update_url_button").innerHTML = update_url_on_html;
 }
 
 var params = document.getElementById("params");
@@ -445,8 +526,9 @@ function findGcdThreshold(ss)
 
 function renderResult(idx, totalPoint, dot, gcd, cri, det, dh, ss, ratioDot, ratioGcd, ratioMix, derivativeDot, derivativeGcd, derivativeMix, unit, criRate, criDmg, dhRate, gcdStatus)
 {
-	return "<table class='result_wrapper'><tbody>"
+	return "<table class='result_wrapper'>"
 		+ "<caption id='pin_button_" + idx + "' style='text-align: right;' onclick='pin_on_click(" + idx + ")'></caption>"
+		+ "<tbody>"
 		+ "<tr><td class='result_wrapper_cell' style='width: 100pt;'><table class='results'>"
 		+ "<tbody>"
 		+ "<tr><th colspan='2'>クリ率/倍率</th></tr>"
@@ -502,7 +584,12 @@ function removeFirstUnpinned()
 	return ret;
 }
 
-function calc()
+function genData(dot, gcd, cri, det, dh, ss)
+{
+	return (dot * 10000).toFixed(0) + "," + (gcd * 10000).toFixed(0) + "," + cri + "," + det + "," + dh + "," + ss;
+}
+
+function calc_input()
 {
 	while(resultHTMLList.length - pinCount > 0)
 	{
@@ -512,10 +599,6 @@ function calc()
 		freeIdx(idx);
 	}
 
-	var tempIdx = allocIdx();
-	if(tempIdx == -1)
-		return;
-
 	var dot = Number(document.getElementById("input4").value) / 100;
 	var gcd = Number(document.getElementById("input5").value) / 100;
 	var cri = Number(document.getElementById("input0").value);
@@ -523,6 +606,15 @@ function calc()
 	var dh = Number(document.getElementById("input2").value);
 	var ss = Number(document.getElementById("input3").value);
 	
+	calc(dot, gcd, cri, det, dh, ss, false);
+}
+
+function calc(dot, gcd, cri, det, dh, ss, pin)
+{
+	var tempIdx = allocIdx();
+	if(tempIdx == -1)
+		return;
+
 	var totalPoint = cri + det + dh + ss;
 	var scale = 100.0;
 	var ratioMix = scale * calcRatioMix(cri, det, dh, ss, dot, gcd);
@@ -542,10 +634,14 @@ function calc()
 	
 	resultHTML = renderResult(tempIdx, totalPoint, dot, gcd, cri, det, dh, ss, ratioDot, ratioGcd, ratioMix, derivativeDot, derivativeGcd, derivativeMix, unit, criRate, criDmg, dhRate, gcdStatus);
 
-	resultHTMLList.push({idx: tempIdx, html: resultHTML});
+	resultHTMLList.push({idx: tempIdx, html: resultHTML, data: genData(dot, gcd, cri, det, dh, ss)});
 
-	pinArray[tempIdx] = false;
-	
+	if(pinArray[tempIdx] = pin)
+	{
+		++pinCount;
+		document.getElementById("calc").disabled = (pinCount == maxResultCount);
+	}
+
 	if(resultHTMLList.length > 0)
 	{
 		var tempHTML = "";
@@ -566,6 +662,23 @@ function calc()
 			target.innerHTML = pinArray[resultHTMLList[i].idx]? pin_on_html: pin_off_html;
 		}
 	}
+
+	document.getElementById("update_url_button").innerHTML = update_url_on_html;
+}
+
+function update_url()
+{
+	var str = "";
+	if(resultHTMLList.length > 0)
+	{
+		str += "?" + resultHTMLList[0].data + (pinArray[resultHTMLList[0].idx]? ",1": ",0");
+		var i;
+		for(i = 1; i < resultHTMLList.length; ++i)
+		{
+			str += "&" + resultHTMLList[i].data + (pinArray[resultHTMLList[i].idx]? ",1": ",0");
+		}
+	}
+	window.history.replaceState({}, "", str);
 }
 
 </script>
