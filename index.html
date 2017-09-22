@@ -254,7 +254,7 @@ var unusedIdxArray = [];
 var isUrlValidated = false;
 
 var update_url_off_html = "<div class='top_button_off'>アドレスバーを更新する</div>";
-var update_url_on_html = "<div class='top_button_on' onmousedown='top_button_down(this)' onmouseup='top_button_up(this)' onclick='update_url()'>アドレスバーを更新する</div>";
+var update_url_on_html = "<div class='top_button_on' onmousedown='top_button_down(this)' onmouseup='top_button_up(this)' onmouseout='top_button_up(this)' onclick='update_url()'>アドレスバーを更新する</div>";
 
 function top_button_down(button)
 {
@@ -264,6 +264,11 @@ function top_button_down(button)
 function top_button_up(button)
 {
 	button.style["padding"] = "2pt";
+}
+
+function updateUpdateUrlButton()
+{
+	document.getElementById("update_url_button").innerHTML = (location.search == genUrl()? update_url_off_html: update_url_on_html);
 }
 
 document.addEventListener("mousedown", function(event) {
@@ -297,7 +302,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		var resultList = location.search.substr(1).split("&");
 		for(var i = 0; i < resultList.length; ++i)
 		{
-			console.log(resultList[i]);
 			var paramList = resultList[i].split(",");
 			if(paramList.length != 7)
 				continue;
@@ -373,7 +377,7 @@ function pin_on_click(idx)
 	pinArray[idx] = !pinArray[idx];
 
 	document.getElementById("calc").disabled = (pinCount == maxResultCount);
-	document.getElementById("update_url_button").innerHTML = update_url_on_html;
+	updateUpdateUrlButton();
 }
 
 var params = document.getElementById("params");
@@ -663,10 +667,10 @@ function calc(dot, gcd, cri, det, dh, ss, pin)
 		}
 	}
 
-	document.getElementById("update_url_button").innerHTML = update_url_on_html;
+	updateUpdateUrlButton();
 }
 
-function update_url()
+function genUrl()
 {
 	var str = "";
 	if(resultHTMLList.length > 0)
@@ -678,7 +682,13 @@ function update_url()
 			str += "&" + resultHTMLList[i].data + (pinArray[resultHTMLList[i].idx]? ",1": ",0");
 		}
 	}
-	window.history.replaceState({}, "", str);
+	return str;
+}
+
+function update_url()
+{
+	window.history.replaceState({}, "", genUrl());
+	document.getElementById("update_url_button").innerHTML = update_url_off_html;
 }
 
 </script>
