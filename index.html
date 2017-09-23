@@ -37,7 +37,7 @@ span.pin_on {
 .top_button_off, .top_button_on {
 	display: block;
 	padding: 2pt;
-	width: 150pt;
+	width: 90pt;
 	text-align: center;
 }
 .top_button_off {
@@ -52,6 +52,9 @@ span.pin_on {
 }
 .top_button_on:hover {
 	color: #BBAC94;
+}
+.top_button_on:active {
+	padding: 3pt 1pt 1pt 3pt;
 }
 .top_button_off, .top_button_on, span.pin_off, span.pin_on {
 	-webkit-touch-callout: none;
@@ -253,18 +256,8 @@ var maxResultCount = 10;
 var unusedIdxArray = [];
 var isUrlValidated = false;
 
-var update_url_off_html = "<div class='top_button_off'>アドレスバーを更新する</div>";
-var update_url_on_html = "<div class='top_button_on' onmousedown='top_button_down(this)' onmouseup='top_button_up(this)' onmouseout='top_button_up(this)' onclick='update_url()'>アドレスバーを更新する</div>";
-
-function top_button_down(button)
-{
-	button.style["padding"] = "3pt 1pt 1pt 3pt";
-}
-
-function top_button_up(button)
-{
-	button.style["padding"] = "2pt";
-}
+var update_url_off_html = "<div class='top_button_off'>URLを作成する</div>";
+var update_url_on_html = "<div class='top_button_on' onclick='update_url()'>URLを作成する</div>";
 
 function updateUpdateUrlButton()
 {
