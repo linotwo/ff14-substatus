@@ -11,11 +11,6 @@ body {
 	font-size: 12pt;
 	margin: 0;
 }
-.main {
-	width: 100%;
-	text-align: center;
-	margin-top: 8pt;
-}
 .main div {
 	margin: 0 auto;
 	text-align: left;
@@ -34,10 +29,29 @@ span.pin_on {
 	text-shadow: -1px 0 #574A30, 0 1px #574A30, 1px 0 #574A30, 0 -1px #574A30;
 	cursor: pointer;
 }
+.job_button_off, .job_button_on, .job_button_empty {
+	text-align: center;
+	padding: 0;
+	border: 0;
+	font-size: 0.8125em;
+	cursor: pointer;
+}
+.job_button_off {
+	color: #202020;
+	text-shadow: -1px 0 #574A30, 0 1px #574A30, 1px 0 #574A30, 0 -1px #574A30;
+}
+.job_button_on {
+	color: #BBAC94;
+	text-shadow: -1px 0 #574A30, 0 1px #574A30, 1px 0 #574A30, 0 -1px #574A30;
+}
+.job_button_empty {
+	color: #202020;
+	text-shadow: -1px 0 #303030, 0 1px #303030, 1px 0 #303030, 0 -1px #303030;
+}
 .top_button_off, .top_button_on {
 	display: block;
 	padding: 2pt;
-	width: 90pt;
+	width: 11.666667em;
 	text-align: center;
 }
 .top_button_off {
@@ -56,7 +70,7 @@ span.pin_on {
 .top_button_on:active {
 	padding: 3pt 1pt 1pt 3pt;
 }
-.top_button_off, .top_button_on, span.pin_off, span.pin_on {
+.job_button_off, .job_button_on, .job_button_empty, .top_button_off, .top_button_on, span.pin_off, span.pin_on {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -94,7 +108,7 @@ th {
 }
 th.type {
 	color: #666666;
-	font-size: 11pt;
+	font-size: 0.875em;
 	text-align: center;
 }
 td.status {
@@ -119,11 +133,11 @@ input {
 	background-color: transparent;
 	border: 0pt solid transparent;
 	color: #C0C0C0;
-	width: 50pt;
+	width: 4.166667em;
 	text-align: right;
 	text-decoration: none;
 	font-family: "ＭＳ ゴシック", sans-serif;
-	font-size: 12pt;
+	font-size: 1em;
 	padding: 3pt;
 	display: inline;
 	margin: 0;
@@ -137,7 +151,7 @@ input::-ms-clear {
 	text-align: center;
 	text-decoration: none;
 	font-family: "ＭＳ ゴシック", sans-serif;
-	font-size: 10pt;
+	font-size: 0.8125em;
 	display: block;
 	cursor: pointer;
 }
@@ -148,10 +162,10 @@ hr {
 </style>
 </head>
 <body>
-<div id="update_url_button" style="height: 18pt;"></div>
+<div id="update_url_button" style="height: 1.5em;"></div>
 <div class="main">
-<div id="params" style="width: 175pt;">
-<table>
+<div id="params" style="width: 14.6em;">
+<table style="-webkit-margin-before: 1em; -webkit-margin-after: 1em;">
 	<tbody>
 	<tr>
 		<td class="status" title="Critical Hit Rate" style="width:100%;">クリティカル</td>
@@ -171,19 +185,44 @@ hr {
 	</tr>
 	</tbody>
 </table>
-<table style="margin-top: 12pt;">
+<table style="-webkit-margin-before: 1em; -webkit-margin-after: 1em;">
 	<tbody>
 	<tr>
-		<th class="type" style="text-align: left; width:100%;">ダメージタイプ</th>
-		<th class="type" style="text-align: right;">％</th>
+		<td id="job_button_list" colspan="2" style="padding: 0;"><!--
+			<table style="border: 0;">
+				<tbody>
+				<tr>
+				<td class="job_button_off">ナ</td>
+				<td class="job_button_off">戦</td>
+				<td class="job_button_off">暗</td>
+				<td class="job_button_off">白</td>
+				<td class="job_button_off">学</td>
+				<td class="job_button_off">占</td>
+				<td class="job_button_off">モ</td>
+				<td class="job_button_off">竜</td>
+				<td class="job_button_off">忍</td>
+				<td class="job_button_off">侍</td>
+				<td class="job_button_off">詩</td>
+				<td class="job_button_off">機</td>
+				<td class="job_button_off">黒</td>
+				<td class="job_button_off">召</td>
+				<td class="job_button_off">赤</td>
+				</tr>
+				</tbody>
+			</table>-->
+		</td>
+	</tr>
+	<tr>
+		<th class="type" style="text-align: left;">ダメージタイプ</th>
+		<th class="type" style="text-align: right; width:4.166667pt;">％</th>
 	</tr>
 	<tr>
 		<td class="status" title="倍率がSSに影響される">DoT/AA</td>
-		<td class="val"><input id="input4" onclick="input_on_click(this)" onfocus="input_on_focus(this, 4)" onchange="calc_ratio(this, 0)" type="text" class="param" maxlength="8" value="0" /></td>
+		<td class="val"><input id="input4" onclick="input_on_click(this)" onfocus="input_on_focus(this, 4)" onchange="ratio_on_change(this, 0)" type="text" class="param" maxlength="8" value="0" /></td>
 	</tr>
 	<tr>
 		<td class="status" title="回数がGCDに影響される">WS/魔法</td>
-		<td class="val"><input id="input5" onclick="input_on_click(this)" onfocus="input_on_focus(this, 5)" onchange="calc_ratio(this, 1)" type="text" class="param" maxlength="8" value="0" /></td>
+		<td class="val"><input id="input5" onclick="input_on_click(this)" onfocus="input_on_focus(this, 5)" onchange="ratio_on_change(this, 1)" type="text" class="param" maxlength="8" value="0" /></td>
 	</tr>
 	<tr>
 		<td class="status">他</td>
@@ -191,9 +230,9 @@ hr {
 	</tr>
 	</tbody>
 </table>
+<button id="calc" class="button1" onclick="calc_input()">計算する</button>
 </div>
-<div style="width: 175pt;"><button id="calc" class="button1" onclick="calc_input()">計算する</button></div>
-<div style="width: 425pt;"><p id="result1"></p></div>
+<div style="width: 35.5em;"><p id="result1"></p></div>
 </div>
 
 <script>
@@ -223,14 +262,8 @@ function to_float(input)
 	input.value = isNaN(temp)? 0: temp;
 }
 
-function calc_ratio(input, idx)
+function calc_ratio(target, idx = 0)
 {
-	to_float(input);
-	var target = [
-		document.getElementById("input4"),
-		document.getElementById("input5"),
-		document.getElementById("result0")
-	]
 	target[0].value = clamp(target[0].value, 0, 100);
 	target[1].value = clamp(target[1].value, 0, 100);
 	if(idx == 0)
@@ -245,6 +278,34 @@ function calc_ratio(input, idx)
 	target[2].innerText = Number(result.toFixed(2));
 }
 
+function ratio_on_change(input, idx)
+{
+	to_float(input);
+
+	var target = [
+		document.getElementById("input4"),
+		document.getElementById("input5"),
+		document.getElementById("result0")
+	];
+
+	calc_ratio(target, idx);
+
+	var key = jobList[jobButtonIdx];
+	if(target[2].innerText == 100)
+	{
+		if(key in jobDataList)
+		{
+			delete jobDataList[key];
+		}
+	}
+	else
+	{
+		jobDataList[key] = [Number(target[0].value), Number(target[1].value)];
+	}
+
+	saveJobData();
+}
+
 var inputIdx = 0;
 var inputCount = 6;
 var delaySelect = false;
@@ -255,13 +316,33 @@ var pinCount = 0;
 var maxResultCount = 10;
 var unusedIdxArray = [];
 var isUrlValidated = false;
+var jobButtonIdx;
+var jobCount;
+var jobList = [];
+var jobButtonText = [];
+var jobDataList = [];
 
 var update_url_off_html = "<div class='top_button_off'>URLを作成する</div>";
 var update_url_on_html = "<div class='top_button_on' onclick='update_url()'>URLを作成する</div>";
 
+var job_button_off_html = "<td class='job_button_off' onclick='select_job(";
+var job_button_on_html = "<td class='job_button_on' onclick='select_job(";
+var job_button_empty_html = "<td class='job_button_empty' onclick='select_job(";
+
 function updateUpdateUrlButton()
 {
 	document.getElementById("update_url_button").innerHTML = (location.search == genUrl()? update_url_off_html: update_url_on_html);
+}
+
+function updateJobButtonList()
+{
+	var html = "<table style='border: 0;'><tbody><tr>";
+	for(var i = 0; i < jobCount; ++i)
+	{
+		html += (jobButtonIdx == i? job_button_on_html: (jobList[i] in jobDataList? job_button_off_html: job_button_empty_html)) + i + ")'>" + jobButtonText[jobList[i]] + "</td>";
+	}
+	html += "</tr></tbody></table>";
+	document.getElementById("job_button_list").innerHTML = html;
 }
 
 document.addEventListener("mousedown", function(event) {
@@ -289,6 +370,30 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		pinArray.push(false);
 	}
 	pinCount = 0;
+
+	jobList = ["PLD", "WAR", "DRK", "WHM", "SCH", "AST", "MNK", "DRG", "NIN", "SAM", "BRD", "MCH", "BLM", "SMN", "RDM", "N/A"];
+	jobCount = jobList.length - 1;
+	jobButtonText["PLD"] = "ナ";
+	jobButtonText["WAR"] = "戦";
+	jobButtonText["DRK"] = "暗";
+	jobButtonText["WHM"] = "白";
+	jobButtonText["SCH"] = "学";
+	jobButtonText["AST"] = "占";
+	jobButtonText["MNK"] = "モ";
+	jobButtonText["DRG"] = "竜";
+	jobButtonText["NIN"] = "忍";
+	jobButtonText["SAM"] = "侍";
+	jobButtonText["BRD"] = "詩";
+	jobButtonText["MCH"] = "機";
+	jobButtonText["BLM"] = "黒";
+	jobButtonText["SMN"] = "召";
+	jobButtonText["RDM"] = "赤";
+	jobButtonIdx = jobCount;
+
+	loadJobData();
+
+	updateJobButtonList();
+
 	isUrlValidated = false;
 	if(location.search.length > 0)
 	{
@@ -322,12 +427,20 @@ document.addEventListener("DOMContentLoaded", function(event) {
 		}
 	}
 
-	var target = [
-		document.getElementById("input4"),
-		document.getElementById("input5"),
-		document.getElementById("result0")
-	]
-	target[2].innerText = Number((100 - target[0].value - target[1].value).toFixed(2));
+	{
+		var target = [
+			document.getElementById("input4"),
+			document.getElementById("input5"),
+			document.getElementById("result0")
+		]
+		var key = jobList[jobCount];
+		if(key in jobDataList)
+		{
+			target[0].value = jobDataList[key][0];
+			target[1].value = jobDataList[key][1];
+		}
+		target[2].innerText = Number((100 - target[0].value - target[1].value).toFixed(2));
+	}
 
 	document.getElementById("update_url_button").innerHTML = update_url_off_html;
 })
@@ -602,7 +715,7 @@ function calc_input()
 	var det = Number(document.getElementById("input1").value);
 	var dh = Number(document.getElementById("input2").value);
 	var ss = Number(document.getElementById("input3").value);
-	
+
 	calc(dot, gcd, cri, det, dh, ss, false);
 }
 
@@ -682,6 +795,94 @@ function update_url()
 {
 	window.history.replaceState({}, "", genUrl());
 	document.getElementById("update_url_button").innerHTML = update_url_off_html;
+}
+
+function loadJobData()
+{
+	var cookie = document.cookie;
+	if(cookie == null || cookie == "")
+		return;
+
+	var decodedCookie = decodeURIComponent(cookie);
+	var str = "";
+	var name = "job_data_list=";
+	var nameValueList = decodedCookie.split(";");
+	for(var i = 0; i < nameValueList.length; ++i)
+	{
+		var nameValue = nameValueList[i];
+		while(nameValue.charAt(0) == " ")
+		{
+			nameValue = nameValue.substr(1);
+		}
+		if(nameValue.indexOf(name) == 0)
+		{
+			str = nameValue.slice(name.length);
+		}
+	}
+	var jobDataStrList = str.split("&");
+	for(var i = 0; i < jobDataStrList.length; ++i)
+	{
+		var arr = jobDataStrList[i].split(",");
+		if(arr.length != 3)
+			continue;
+		jobDataList[arr[0]] = [arr[1], arr[2]];
+	}
+}
+
+function saveJobData()
+{
+	var str = "";
+	for(var prop in jobDataList)
+	{
+		if(jobDataList.hasOwnProperty(prop))
+		{
+			if(str.length > 0)
+			{
+				str += "&";
+			}
+			str += prop + "," + jobDataList[prop][0] + "," + jobDataList[prop][1];
+		}
+	}
+	var cookie = encodeURIComponent("job_data_list=" + str + ";Max-Age=" + (str.length > 0? 3 * 31556926: 0));
+	document.cookie = cookie;
+}
+
+function select_job(idx)
+{
+	var target = [
+		document.getElementById("input4"),
+		document.getElementById("input5"),
+		document.getElementById("result0")
+	];
+
+	var moveValueWhenEmpty = (jobButtonIdx == jobCount && jobList[jobCount] in jobDataList? true: false);
+
+	jobButtonIdx = (idx == jobButtonIdx? jobCount: idx);
+
+	var key = jobList[jobButtonIdx];
+	if(key in jobDataList)
+	{
+		target[0].value = jobDataList[key][0];
+		target[1].value = jobDataList[key][1];
+	}
+	else
+	{
+		if(moveValueWhenEmpty)
+		{
+			jobDataList[key] = [target[0].value, target[1].value];
+			delete jobDataList[jobList[jobCount]];
+			saveJobData();
+		}
+		else
+		{
+			target[0].value = 0;
+			target[1].value = 0;
+		}
+	}
+
+	calc_ratio(target);
+
+	updateJobButtonList();
 }
 
 </script>
