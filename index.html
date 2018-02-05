@@ -417,8 +417,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
 			if(i == resultList.length - 1)
 			{
-				document.getElementById("input4").value = dot * 100;
-				document.getElementById("input5").value = gcd * 100;
+				document.getElementById("input4").value = (dot * 100).toFixed(2);
+				document.getElementById("input5").value = (gcd * 100).toFixed(2);
 				document.getElementById("input0").value = cri;
 				document.getElementById("input1").value = det;
 				document.getElementById("input2").value = dh;
