@@ -7,7 +7,7 @@
 body {
 	background-color: #202020;
 	color: #CCCCCC;
-	font-family: "ＭＳ ゴシック", sans-serif;
+	font-family: "ＭＳ ゴシック", Menlo, monospace;
 	font-size: 12pt;
 	margin: 0;
 }
@@ -19,15 +19,16 @@ body {
 span.ratio {
 	color: #FFFFFF;
 }
-span.pin_off {
-	color: #202020;
+span.pin_off, span.pin_on {
+	font-size: 12pt;
 	text-shadow: -1px 0 #574A30, 0 1px #574A30, 1px 0 #574A30, 0 -1px #574A30;
 	cursor: pointer;
 }
+span.pin_off {
+	color: #202020;
+}
 span.pin_on {
 	color: #BBAC94;
-	text-shadow: -1px 0 #574A30, 0 1px #574A30, 1px 0 #574A30, 0 -1px #574A30;
-	cursor: pointer;
 }
 .job_button_off, .job_button_on, .job_button_empty {
 	text-align: center;
@@ -137,7 +138,7 @@ input {
 	width: 4.166667em;
 	text-align: right;
 	text-decoration: none;
-	font-family: "ＭＳ ゴシック", sans-serif;
+	font-family: "ＭＳ ゴシック", Menlo, monospace;
 	font-size: 1em;
 	padding: 3pt;
 	display: inline;
@@ -151,7 +152,7 @@ input::-ms-clear {
 	padding: 2pt;
 	text-align: center;
 	text-decoration: none;
-	font-family: "ＭＳ ゴシック", sans-serif;
+	font-family: "ＭＳ ゴシック", Menlo, monospace;
 	font-size: 0.8125em;
 	display: block;
 	cursor: pointer;
@@ -656,10 +657,10 @@ function renderResult(idx, totalPoint, dot, gcd, cri, det, dh, ss, ratioDot, rat
 		+ "<td class='result_wrapper_cell' style='width: 2pt;'></td>"
 		+ "<td class='result_wrapper_cell'><table class='results'>"
 		+ "<tbody>"
-		+ "<tr><td colspan='3' style='background-color: #101010; text-align: center;'><span style='color: #BBAC94;'>サブステ合計</span> " + totalPoint + "</td><th style='width: 60pt;'>DoT/AA</th><th style='width: 60pt;'>WS/魔法</th><th style='width: 60pt;'>総合</th></tr>"
+		+ "<tr><td colspan='3' style='background-color: #101010; text-align: center;'><nobr><span style='color: #BBAC94;'>サブステ合計</span> " + totalPoint + "</nobr></td><th style='width: 5em;'>DoT/AA</th><th style='width: 5em;'>WS/魔法</th><th style='width: 5em;'>総合</th></tr>"
 		+ "<tr><th colspan='3'>割合</th><td class='val3'>" + (dot * 100).toFixed(2) + "%</td><td class='val3'>" + (gcd * 100).toFixed(2) + "%</td><td class='val3'>100.00%</td></tr>"
 		+ "<tr><th colspan='3'>DPS倍率</th><td class='val2'>" + ratioDot.toFixed(4) + "%</td><td class='val2'>" + ratioGcd.toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + ratioMix.toFixed(4) + "</span>%</td></tr>"
-		+ "<tr><th rowspan='4'>変化率<br />" + unit + "ｱﾀﾘ</th><td class='status'>クリ</td><td class='val3' style='width: 25pt;'>" + cri + "</td><td class='val2'>" + derivativeDot[0].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[0].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[0].toFixed(4) + "</span>%</td></tr>"
+		+ "<tr><th rowspan='4'><nobr>変化率</nobr><br />" + unit + "ｱﾀﾘ</th><td class='status' style='width: 2em;'><nobr>クリ</nobr></td><td class='val3' style='width: 2em;'>" + cri + "</td><td class='val2'>" + derivativeDot[0].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[0].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[0].toFixed(4) + "</span>%</td></tr>"
 		+ "<tr><td class='status'>意思</td><td class='val3'>" + det + "</td><td class='val2'>" + derivativeDot[1].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[1].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[1].toFixed(4) + "</span>%</td></tr>"
 		+ "<tr><td class='status'>DH</td><td class='val3'>" + dh + "</td><td class='val2'>" + derivativeDot[2].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[2].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[2].toFixed(4) + "</span>%</td></tr>"
 		+ "<tr><td class='status'>SS</td><td class='val3'>" + ss + "</td><td class='val2'>" + derivativeDot[3].toFixed(4) + "%</td><td class='val2'>" + derivativeGcd[3].toFixed(4) + "%</td><td class='val2'><span class='ratio'>" + derivativeMix[3].toFixed(4) + "</span>%</td></tr>"
