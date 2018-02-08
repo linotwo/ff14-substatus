@@ -49,9 +49,8 @@ span.pin_on {
 	text-shadow: -1px 0 #303030, 0 1px #303030, 1px 0 #303030, 0 -1px #303030;
 }
 .top_button_off, .top_button_on {
-	display: block;
+	margin: 0 1pt 1pt 0;
 	padding: 2pt;
-	width: 11.666667em;
 	text-align: center;
 }
 .top_button_off {
@@ -68,7 +67,9 @@ span.pin_on {
 	color: #BBAC94;
 }
 .top_button_on:active {
-	padding: 3pt 1pt 1pt 3pt;
+	position: relative;
+	left: 1pt;
+	top: 1pt;
 }
 .job_button_off, .job_button_on, .job_button_empty, .top_button_off, .top_button_on, span.pin_off, span.pin_on {
 	-webkit-touch-callout: none;
@@ -162,7 +163,9 @@ hr {
 </style>
 </head>
 <body>
-<div id="update_url_button" style="height: 1.5em;"></div>
+<div>
+<nobr><div id="return_button" style="display: inline-block; width: 70pt;"><div class='top_button_on' onclick='return_on_click()'>←</div></div><div id="update_url_button" style="display: inline-block; width: 11.666667em;"></div></nobr>
+</div>
 <div class="main">
 <div id="params" style="width: 14.6em;">
 <table style="margin-top: 1em; margin-bottom: 1em;">
@@ -789,6 +792,11 @@ function genUrl()
 		}
 	}
 	return str;
+}
+
+function return_on_click()
+{
+	window.location.href = "../";
 }
 
 function update_url()

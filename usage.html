@@ -16,6 +16,38 @@ body {
 	text-align: left;
 	padding: 8pt;
 }
+.top_button_off, .top_button_on {
+	margin: 0 1pt 1pt 0;
+	padding: 2pt;
+	text-align: center;
+}
+.top_button_off {
+	border: 1pt solid #303030;
+	color: #303030;
+	cursor: default;
+}
+.top_button_on {
+	border: 1pt solid #574A30;
+	color: #574A30;
+	cursor: pointer;
+}
+.top_button_on:hover {
+	color: #BBAC94;
+}
+.top_button_on:active {
+	position: relative;
+	left: 1pt;
+	top: 1pt;
+}
+.top_button_off, .top_button_on {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	white-space: nowrap;
+}
 h1, h2, h3 {
 	color: #BBAC94;
 }
@@ -26,6 +58,9 @@ hr {
 </style>
 </head>
 <body>
+<div>
+<div id="return_button" style="display: inline-block; width: 70pt;"><div class='top_button_on' onclick='return_on_click()'>←</div></div>
+</div>
 <div class="main">
 <div style="width: 50em;">
 <h1>FF14 4.0 サブステータス計算ツール 使用法</h1>
@@ -77,5 +112,14 @@ hr {
 </blockquote>
 </div>
 </div>
+
+<script>
+
+function return_on_click()
+{
+	window.location.href = "../";
+}
+
+</script>
 </body>
 </html>
