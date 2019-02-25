@@ -852,7 +852,9 @@ function saveJobData()
 			str += prop + "," + jobDataList[prop][0] + "," + jobDataList[prop][1];
 		}
 	}
-	var cookie = encodeURIComponent("job_data_list=" + str + ";Max-Age=" + (str.length > 0? 3 * 31556926: 0));
+	var d = new Date();
+	d.setTime(d.getTime() + (str.length > 0? 3 * 31536000000: 0));
+	var cookie = encodeURIComponent("job_data_list=" + str + ";expires=" + d.toUTCString());
 	document.cookie = cookie;
 }
 
