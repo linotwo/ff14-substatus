@@ -812,10 +812,9 @@ function loadJobData()
 	if(cookie == null || cookie == "")
 		return;
 
-	var decodedCookie = decodeURIComponent(cookie);
 	var str = "";
 	var name = "job_data_list=";
-	var nameValueList = decodedCookie.split(";");
+	var nameValueList = cookie.split(";");
 	for(var i = 0; i < nameValueList.length; ++i)
 	{
 		var nameValue = nameValueList[i];
@@ -825,7 +824,7 @@ function loadJobData()
 		}
 		if(nameValue.indexOf(name) == 0)
 		{
-			str = nameValue.slice(name.length);
+			str = decodeURIComponent(nameValue.slice(name.length));
 		}
 	}
 	var jobDataStrList = str.split("&");
@@ -854,7 +853,7 @@ function saveJobData()
 	}
 	var d = new Date();
 	d.setTime(d.getTime() + (str.length > 0? 3 * 31536000000: 0));
-	var cookie = encodeURIComponent("job_data_list=" + str + ";expires=" + d.toUTCString());
+	var cookie = "job_data_list=" + encodeURIComponent(str) + ";expires=" + d.toUTCString();
 	document.cookie = cookie;
 }
 
