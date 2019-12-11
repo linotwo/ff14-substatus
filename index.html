@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title>FF14 4.0 サブステータス計算ツール</title>
+<title>FF14 5.0 サブステータス計算ツール</title>
 <style>
 body {
 	background-color: #202020;
@@ -172,20 +172,24 @@ hr {
 <table style="margin-top: 1em; margin-bottom: 1em;">
 	<tbody>
 	<tr>
+		<td class="status" title="Level" style="width:100%;">LEVEL</td>
+		<td class="val"><input id="input7" onclick="input_on_click(this)" onfocus="input_on_focus(this, 7)" onblur="to_int_lv(this, 1, 80)" type="text" class="param" maxlength="3" value="80" /></td>
+	</tr>
+	<tr>
 		<td class="status" title="Critical Hit Rate" style="width:100%;">クリティカル</td>
-		<td class="val"><input id="input0" onclick="input_on_click(this)" onfocus="input_on_focus(this, 0)" onblur="to_int(this, 364)" type="text" class="param" maxlength="5" value="364" /></td>
+		<td class="val"><input id="input0" onclick="input_on_click(this)" onfocus="input_on_focus(this, 0)" onblur="to_int(this, levelMod(document.getElementById('input7').value, 1))" type="text" class="param" maxlength="5" value="380" /></td>
 	</tr>
 	<tr>
 		<td class="status" title="Determination">意思力</td>
-		<td class="val"><input id="input1" onclick="input_on_click(this)" onfocus="input_on_focus(this, 1)" onblur="to_int(this, 292)" type="text" class="param" maxlength="5" value="292" /></td>
+		<td class="val"><input id="input1" onclick="input_on_click(this)" onfocus="input_on_focus(this, 1)" onblur="to_int(this, levelMod(document.getElementById('input7').value, 0))" type="text" class="param" maxlength="5" value="340" /></td>
 	</tr>
 	<tr>
 		<td class="status" title="Direct Hit Rate">ダイレクトヒット</td>
-		<td class="val"><input id="input2" onclick="input_on_click(this)" onfocus="input_on_focus(this, 2)" onblur="to_int(this, 364)" type="text" class="param" maxlength="5" value="364" /></td>
+		<td class="val"><input id="input2" onclick="input_on_click(this)" onfocus="input_on_focus(this, 2)" onblur="to_int(this, levelMod(document.getElementById('input7').value, 1))" type="text" class="param" maxlength="5" value="380" /></td>
 	</tr>
 	<tr>
 		<td class="status" title="Skill Speed/Spell Speed">スキスピ/スペスピ</td>
-		<td class="val"><input id="input3" onclick="input_on_click(this)" onfocus="input_on_focus(this, 3)" onblur="to_int(this, 364)" type="text" class="param" maxlength="5" value="364" /></td>
+		<td class="val"><input id="input3" onclick="input_on_click(this)" onfocus="input_on_focus(this, 3)" onblur="to_int(this, levelMod(document.getElementById('input7').value, 1))" type="text" class="param" maxlength="5" value="380" /></td>
 	</tr>
 	</tbody>
 </table>
@@ -252,13 +256,30 @@ function select_all(input)
 	input.setSelectionRange(0, input.value.length);
 }
 
-function to_int(input, min)
+function to_int(input, min, max=9999)
 {
 	var ch = input.value.substr(0, 1);
 	var isDiff = (ch == "+" || ch == "-");
 	var temp = parseInt(input.value, 10);
-	input.value = isNaN(temp)? lastValue: clamp((isDiff? (Number(lastValue) + Number(temp)): temp), min, 9999);
+	input.value = isNaN(temp)? lastValue: clamp((isDiff? (Number(lastValue) + Number(temp)): temp), min, max);
 }
+
+function to_int_lv(input, min, max)
+{
+	to_int(input, min, max)
+	var target = [
+		document.getElementById("input0"),
+		document.getElementById("input1"),
+		document.getElementById("input2"),
+		document.getElementById("input3")
+	];
+	var lv = document.getElementById("input7").value;
+	to_int(target[0], levelMod(lv, 1));
+	to_int(target[1], levelMod(lv, 0));
+	to_int(target[2], levelMod(lv, 1));
+	to_int(target[3], levelMod(lv, 1));
+}
+
 
 function to_float(input)
 {
@@ -319,7 +340,6 @@ var pinArray = [];
 var pinCount = 0;
 var maxResultCount = 10;
 var unusedIdxArray = [];
-var isUrlValidated = false;
 var jobButtonIdx;
 var jobCount;
 var jobList = [];
@@ -398,14 +418,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
 	updateJobButtonList();
 
-	isUrlValidated = false;
 	if(location.search.length > 0)
 	{
 		var resultList = location.search.substr(1).split("&");
 		for(var i = 0; i < resultList.length; ++i)
 		{
 			var paramList = resultList[i].split(",");
-			if(paramList.length != 7)
+			if(paramList.length < 7)
 				continue;
 			var dot = Number(paramList[0]) / 10000;
 			var gcd = Number(paramList[1]) / 10000;
@@ -414,10 +433,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
 			var dh = Number(paramList[4]);
 			var ss = Number(paramList[5]);
 			var pin = Number(paramList[6]);
-			if(isNaN(dot) || isNaN(gcd) || isNaN(cri) || isNaN(det) || isNaN(dh) || isNaN(ss) || isNaN(pin))
+			var lv = Number(paramList[7]);
+			if(isNaN(dot) || isNaN(gcd) || isNaN(cri) || isNaN(det) || isNaN(dh) || isNaN(ss) || isNaN(pin) || isNaN(lv))
 				continue;
 
-			calc(dot, gcd, cri, det, dh, ss, pin);
+			calc(dot, gcd, cri, det, dh, ss, pin, lv);
 
 			if(i == resultList.length - 1)
 			{
@@ -427,6 +447,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 				document.getElementById("input1").value = det;
 				document.getElementById("input2").value = dh;
 				document.getElementById("input3").value = ss;
+				document.getElementById("input7").value = lv;
 			}
 		}
 	}
@@ -530,108 +551,279 @@ function ROUNDDOWN(number, num_digits)
 	return Math.floor(scale * number) / scale;
 }
 
-function calcRatioNoSs(cri, det, dh)
+function levelMod(lv, idx)
+{
+	var table = [
+		[  0,   0,    0], // 0
+		[ 20,  56,   56],
+		[ 21,  57,   57],
+		[ 22,  60,   60],
+		[ 24,  62,   62],
+		[ 26,  65,   65],
+		[ 27,  68,   68],
+		[ 29,  70,   70],
+		[ 31,  73,   73],
+		[ 33,  76,   76],
+		[ 35,  78,   78], // 10
+		[ 36,  82,   82],
+		[ 38,  85,   85],
+		[ 41,  89,   89],
+		[ 44,  93,   93],
+		[ 46,  96,   96],
+		[ 49, 100,  100],
+		[ 52, 104,  104],
+		[ 54, 109,  109],
+		[ 57, 113,  113],
+		[ 60, 116,  116], // 20
+		[ 63, 122,  122],
+		[ 67, 127,  127],
+		[ 71, 133,  133],
+		[ 74, 138,  138],
+		[ 78, 144,  144],
+		[ 81, 150,  150],
+		[ 85, 155,  155],
+		[ 89, 162,  162],
+		[ 92, 168,  168],
+		[ 97, 173,  173], // 30
+		[101, 181,  181],
+		[106, 188,  188],
+		[110, 194,  194],
+		[115, 202,  202],
+		[119, 209,  209],
+		[124, 215,  215],
+		[128, 223,  223],
+		[134, 229,  229],
+		[139, 236,  236],
+		[144, 244,  244], // 40
+		[150, 253,  253],
+		[155, 263,  263],
+		[161, 272,  272],
+		[166, 283,  283],
+		[171, 292,  292],
+		[177, 302,  302],
+		[183, 311,  311],
+		[189, 322,  322],
+		[196, 331,  331],
+		[202, 341,  341], // 50
+		[204, 342,  393],
+		[205, 344,  444],
+		[207, 345,  496],
+		[209, 346,  548],
+		[210, 347,  600],
+		[212, 349,  651],
+		[214, 350,  703],
+		[215, 351,  755],
+		[217, 352,  806],
+		[218, 354,  858], // 60
+		[224, 355,  941],
+		[228, 356, 1032],
+		[236, 357, 1133],
+		[244, 358, 1243],
+		[252, 359, 1364],
+		[260, 360, 1497],
+		[268, 361, 1643],
+		[276, 362, 1802],
+		[284, 363, 1978],
+		[292, 364, 2170], // 70
+		[296, 365, 2263],
+		[300, 366, 2360],
+		[305, 367, 2461],
+		[310, 368, 2566],
+		[315, 370, 2676],
+		[320, 372, 2790],
+		[325, 374, 2910],
+		[330, 376, 3034],
+		[355, 378, 3164],
+		[340, 380, 3300]  // 80
+	];
+	return table[lv][idx];
+}
+
+function funcCriRateAnalog(cri, lv)
+{
+	return (200 * (cri - levelMod(lv, 1)) / levelMod(lv, 2) + 50) / 1000;
+}
+
+function funcCriRate(cri, lv)
+{
+	return Math.floor(200 * (cri - levelMod(lv, 1)) / levelMod(lv, 2) + 50) / 1000;
+}
+
+function funcCriDmgAnalog(cri, lv)
+{
+	return (200 * (cri - levelMod(lv, 1)) / levelMod(lv, 2) + 400) / 1000;
+}
+
+function funcCriDmg(cri, lv)
+{
+	return Math.floor(200 * (cri - levelMod(lv, 1)) / levelMod(lv, 2) + 400) / 1000;
+}
+
+function funcDetAnalog(det, lv)
+{
+	return (130 * (det - levelMod(lv, 0)) / levelMod(lv, 2)) / 1000;
+}
+
+function funcDet(det, lv)
+{
+	return Math.floor(130 * (det - levelMod(lv, 0)) / levelMod(lv, 2)) / 1000;
+}
+
+function funcDhRateAnalog(dh, lv)
+{
+	return (550 * (dh - levelMod(lv, 1)) / levelMod(lv, 2)) / 1000;
+}
+
+function funcDhRate(dh, lv)
+{
+	return Math.floor(550 * (dh - levelMod(lv, 1)) / levelMod(lv, 2)) / 1000;
+}
+
+function funcSsAnalog(ss, lv)
+{
+	return (130 * (ss - levelMod(lv, 1)) / levelMod(lv, 2)) / 1000;
+}
+
+function funcSs(ss, lv)
+{
+	return Math.floor(130 * (ss - levelMod(lv, 1)) / levelMod(lv, 2)) / 1000;
+}
+
+function funcGcdAnalog(ss, lv)
+{
+	return ((1000 - (130 * (ss - levelMod(lv, 1)) / levelMod(lv, 2))) * 2.5) / 1000;
+}
+
+function funcGcd(ss, lv)
+{
+	return ROUNDDOWN(Math.floor((1000 - Math.floor(130 * (ss - levelMod(lv, 1)) / levelMod(lv, 2))) * 2.5) / 1000, 2)
+}
+
+function calcRatioNoSs(cri, det, dh, lv)
 {
 	var ret = 1.0;
-	var criRate = (0.05 + (cri - 364) * 0.000092);
-	var criDmg = (0.4 + (cri - 364) * 0.000092);
+	var criRate = funcCriRate(cri, lv);
+	var criDmg = funcCriDmg(cri, lv);
 	ret *= 1.0 + criRate * criDmg;
-	ret *= 1.0 + ((det - 292) * 0.0000592);
-	ret *= 1.0 + (((dh - 364) * 0.000251) * 0.25);
+	ret *= 1.0 + funcDet(det, lv);
+	ret *= 1.0 + funcDhRate(dh, lv) * 0.25;
 	return ret;
 }
 
-function calcRatioDot(cri, det, dh, ss)
+function calcRatioNoSs2(cri, det, dh, lv)
 {
 	var ret = 1.0;
-	var criRate = (0.05 + (cri - 364) * 0.000092);
-	var criDmg = (0.4 + (cri - 364) * 0.000092);
+	var criRate = funcCriRateAnalog(cri, lv);
+	var criDmg = funcCriDmgAnalog(cri, lv);
 	ret *= 1.0 + criRate * criDmg;
-	ret *= 1.0 + ((det - 292) * 0.0000592);
-	ret *= 1.0 + (((dh - 364) * 0.000251) * 0.25);
-	ret *= 1.0 + ((ss - 364) * 0.000057);
+	ret *= 1.0 + funcDetAnalog(det, lv);
+	ret *= 1.0 + funcDhRateAnalog(dh, lv) * 0.25;
 	return ret;
 }
 
-function calcRatioGcd(cri, det, dh, ss)
+function calcRatioDot(cri, det, dh, ss, lv)
 {
 	var ret = 1.0;
-	var criRate = (0.05 + (cri - 364) * 0.000092);
-	var criDmg = (0.4 + (cri - 364) * 0.000092);
+	var criRate = funcCriRate(cri, lv);
+	var criDmg = funcCriDmg(cri, lv);
 	ret *= 1.0 + criRate * criDmg;
-	ret *= 1.0 + ((det - 292) * 0.0000592);
-	ret *= 1.0 + (((dh - 364) * 0.000251) * 0.25);
-	ret *= 2.5 / ROUNDDOWN(2.5025 * (1.0 - (ss - 364) * 0.059848 / 1000.0), 2);
+	ret *= 1.0 + funcDet(det, lv);
+	ret *= 1.0 + funcDhRate(dh, lv) * 0.25;
+	ret *= 1.0 + funcSs(ss, lv);
 	return ret;
 }
 
-function calcRatioGcd2(cri, det, dh, ss)
+function calcRatioDot2(cri, det, dh, ss, lv)
 {
 	var ret = 1.0;
-	var criRate = (0.05 + (cri - 364) * 0.000092);
-	var criDmg = (0.4 + (cri - 364) * 0.000092);
+	var criRate = funcCriRateAnalog(cri, lv);
+	var criDmg = funcCriDmgAnalog(cri, lv);
 	ret *= 1.0 + criRate * criDmg;
-	ret *= 1.0 + ((det - 292) * 0.0000592);
-	ret *= 1.0 + (((dh - 364) * 0.000251) * 0.25);
-	ret *= 2.5 / (2.5025 * (1.0 - (ss - 364) * 0.059848 / 1000.0));
+	ret *= 1.0 + funcDetAnalog(det, lv);
+	ret *= 1.0 + funcDhRateAnalog(dh, lv) * 0.25;
+	ret *= 1.0 + funcSsAnalog(ss, lv);
 	return ret;
 }
 
-function calcRatioMix(cri, det, dh, ss, dot, gcd)
+function calcRatioGcd(cri, det, dh, ss, lv)
+{
+	var ret = 1.0;
+	var criRate = funcCriRate(cri, lv);
+	var criDmg = funcCriDmg(cri, lv);
+	ret *= 1.0 + criRate * criDmg;
+	ret *= 1.0 + funcDet(det, lv);
+	ret *= 1.0 + funcDhRate(dh, lv) * 0.25;
+	ret *= 2.5 / funcGcd(ss, lv);
+	return ret;
+}
+
+function calcRatioGcd2(cri, det, dh, ss, lv)
+{
+	var ret = 1.0;
+	var criRate = funcCriRateAnalog(cri, lv);
+	var criDmg = funcCriDmgAnalog(cri, lv);
+	ret *= 1.0 + criRate * criDmg;
+	ret *= 1.0 + funcDetAnalog(det, lv);
+	ret *= 1.0 + funcDhRateAnalog(dh, lv) * 0.25;
+	ret *= 2.5 / funcGcdAnalog(ss, lv);
+	return ret;
+}
+
+function calcRatioMix(cri, det, dh, ss, lv, dot, gcd)
 {
 	var rest = 1.0 - dot - gcd;
-	return rest * calcRatioNoSs(cri, det, dh) + dot * calcRatioDot(cri, det, dh, ss) + gcd * calcRatioGcd(cri, det, dh, ss);
+	return rest * calcRatioNoSs(cri, det, dh, lv) + dot * calcRatioDot(cri, det, dh, ss, lv) + gcd * calcRatioGcd(cri, det, dh, ss, lv);
 }
 
-function calcRatioMix2(cri, det, dh, ss, dot, gcd)
+function calcRatioMix2(cri, det, dh, ss, lv, dot, gcd)
 {
 	var rest = 1.0 - dot - gcd;
-	return rest * calcRatioNoSs(cri, det, dh) + dot * calcRatioDot(cri, det, dh, ss) + gcd * calcRatioGcd2(cri, det, dh, ss);
+	return rest * calcRatioNoSs2(cri, det, dh, lv) + dot * calcRatioDot2(cri, det, dh, ss, lv) + gcd * calcRatioGcd2(cri, det, dh, ss, lv);
 }
 
-function calcDerivativeDot(cri, det, dh, ss, scale, unit)
+function calcDerivativeDot(cri, det, dh, ss, lv, scale, unit)
 {
-	var base = calcRatioDot(cri, det, dh, ss);
-	var dCri = scale * (calcRatioDot(cri + unit, det, dh, ss) - base);
-	var dDet = scale * (calcRatioDot(cri, det + unit, dh, ss) - base);
-	var dDh = scale * (calcRatioDot(cri, det, dh + unit, ss) - base);
-	var dSs = scale * (calcRatioDot(cri, det, dh, ss + unit) - base);
+	var base = calcRatioDot2(cri, det, dh, ss, lv);
+	var dCri = scale * (calcRatioDot2(cri + unit, det, dh, ss, lv) - base);
+	var dDet = scale * (calcRatioDot2(cri, det + unit, dh, ss, lv) - base);
+	var dDh = scale * (calcRatioDot2(cri, det, dh + unit, ss, lv) - base);
+	var dSs = scale * (calcRatioDot2(cri, det, dh, ss + unit, lv) - base);
 	return [dCri, dDet, dDh, dSs];
 }
 
-function calcDerivativeGcd(cri, det, dh, ss, scale, unit)
+function calcDerivativeGcd(cri, det, dh, ss, lv, scale, unit)
 {
-	var base = calcRatioGcd(cri, det, dh, ss);
-	var dCri = scale * (calcRatioGcd(cri + unit, det, dh, ss) - base);
-	var dDet = scale * (calcRatioGcd(cri, det + unit, dh, ss) - base);
-	var dDh = scale * (calcRatioGcd(cri, det, dh + unit, ss) - base);
-	var dSs = scale * (calcRatioGcd2(cri, det, dh, ss + unit) - calcRatioGcd2(cri, det, dh, ss));
+	var base = calcRatioGcd2(cri, det, dh, ss, lv);
+	var dCri = scale * (calcRatioGcd2(cri + unit, det, dh, ss, lv) - base);
+	var dDet = scale * (calcRatioGcd2(cri, det + unit, dh, ss, lv) - base);
+	var dDh = scale * (calcRatioGcd2(cri, det, dh + unit, ss, lv) - base);
+	var dSs = scale * (calcRatioGcd2(cri, det, dh, ss + unit, lv) - base);
 	return [dCri, dDet, dDh, dSs];
 }
 
-function calcDerivativeMix(cri, det, dh, ss, dot, gcd, scale, unit)
+function calcDerivativeMix(cri, det, dh, ss, lv, dot, gcd, scale, unit)
 {
-	var base = calcRatioMix(cri, det, dh, ss, dot, gcd);
-	var dCri = scale * (calcRatioMix(cri + unit, det, dh, ss, dot, gcd) - base);
-	var dDet = scale * (calcRatioMix(cri, det + unit, dh, ss, dot, gcd) - base);
-	var dDh = scale * (calcRatioMix(cri, det, dh + unit, ss, dot, gcd) - base);
-	var dSs = scale * (calcRatioMix2(cri, det, dh, ss + unit, dot, gcd) - calcRatioMix2(cri, det, dh, ss, dot, gcd));
+	var base = calcRatioMix2(cri, det, dh, ss, lv, dot, gcd);
+	var dCri = scale * (calcRatioMix2(cri + unit, det, dh, ss, lv, dot, gcd) - base);
+	var dDet = scale * (calcRatioMix2(cri, det + unit, dh, ss, lv, dot, gcd) - base);
+	var dDh = scale * (calcRatioMix2(cri, det, dh + unit, ss, lv, dot, gcd) - base);
+	var dSs = scale * (calcRatioMix2(cri, det, dh, ss + unit, lv, dot, gcd) - base);
 	return [dCri, dDet, dDh, dSs];
 }
 
-function findGcdThreshold(ss)
+function findGcdThreshold(ss, lv)
 {
-	var gcdPeriod = ROUNDDOWN(2.5025 * (1.0 - (ss - 364) * 0.059848 / 1000.0), 2);
+	var gcdPeriod = funcGcd(ss, lv);
 	var current, next;
 	{
 		var val = ss;
-		while(ROUNDDOWN(2.5025 * (1.0 - (val - 364) * 0.059848 / 1000.0), 2) == gcdPeriod)
+		while(funcGcd(val, lv) == gcdPeriod)
 			--val;
 		current = val + 1;
 	}
 	{
 		var val = ss;
-		while(ROUNDDOWN(2.5025 * (1.0 - (val - 364) * 0.059848 / 1000.0), 2) == gcdPeriod)
+		while(funcGcd(val, lv) == gcdPeriod)
 			++val;
 		next = val;
 	}
@@ -719,11 +911,12 @@ function calc_input()
 	var det = Number(document.getElementById("input1").value);
 	var dh = Number(document.getElementById("input2").value);
 	var ss = Number(document.getElementById("input3").value);
+	var lv = Number(document.getElementById("input7").value);
 
-	calc(dot, gcd, cri, det, dh, ss, false);
+	calc(dot, gcd, cri, det, dh, ss, false, lv);
 }
 
-function calc(dot, gcd, cri, det, dh, ss, pin)
+function calc(dot, gcd, cri, det, dh, ss, pin, lv)
 {
 	var tempIdx = allocIdx();
 	if(tempIdx == -1)
@@ -731,24 +924,24 @@ function calc(dot, gcd, cri, det, dh, ss, pin)
 
 	var totalPoint = cri + det + dh + ss;
 	var scale = 100.0;
-	var ratioMix = scale * calcRatioMix(cri, det, dh, ss, dot, gcd);
-	var ratioDot = scale * calcRatioDot(cri, det, dh, ss);
-	var ratioGcd = scale * calcRatioGcd(cri, det, dh, ss);
-	var unit = 40;
-	var derivativeMix = calcDerivativeMix(cri, det, dh, ss, dot, gcd, scale, unit);
-	var derivativeDot = calcDerivativeDot(cri, det, dh, ss, scale, unit);
-	var derivativeGcd = calcDerivativeGcd(cri, det, dh, ss, scale, unit);
+	var ratioMix = scale * calcRatioMix(cri, det, dh, ss, lv, dot, gcd);
+	var ratioDot = scale * calcRatioDot(cri, det, dh, ss, lv);
+	var ratioGcd = scale * calcRatioGcd(cri, det, dh, ss, lv);
+	var unit = 60;
+	var derivativeMix = calcDerivativeMix(cri, det, dh, ss, lv, dot, gcd, scale, unit);
+	var derivativeDot = calcDerivativeDot(cri, det, dh, ss, lv, scale, unit);
+	var derivativeGcd = calcDerivativeGcd(cri, det, dh, ss, lv, scale, unit);
 
-	var criRate = (0.05 + (cri - 364) * 0.000092);
-	var criDmg = (0.4 + (cri - 364) * 0.000092);
-	var dhRate = ((dh - 364) * 0.000251);
+	var criRate = funcCriRate(cri, lv);
+	var criDmg = funcCriDmg(cri, lv);
+	var dhRate = funcDhRate(dh, lv);
 	var gcdStatus;
 	
-	gcdStatus = findGcdThreshold(ss);
+	gcdStatus = findGcdThreshold(ss, lv);
 	
 	resultHTML = renderResult(tempIdx, totalPoint, dot, gcd, cri, det, dh, ss, ratioDot, ratioGcd, ratioMix, derivativeDot, derivativeGcd, derivativeMix, unit, criRate, criDmg, dhRate, gcdStatus);
 
-	resultHTMLList.push({idx: tempIdx, html: resultHTML, data: genData(dot, gcd, cri, det, dh, ss)});
+	resultHTMLList.push({idx: tempIdx, html: resultHTML, data: genData(dot, gcd, cri, det, dh, ss), lv: lv});
 
 	if(pinArray[tempIdx] = pin)
 	{
@@ -785,11 +978,11 @@ function genUrl()
 	var str = "";
 	if(resultHTMLList.length > 0)
 	{
-		str += "?" + resultHTMLList[0].data + (pinArray[resultHTMLList[0].idx]? ",1": ",0");
+		str += "?" + resultHTMLList[0].data + (pinArray[resultHTMLList[0].idx]? ",1": ",0") + "," + resultHTMLList[0].lv;
 		var i;
 		for(i = 1; i < resultHTMLList.length; ++i)
 		{
-			str += "&" + resultHTMLList[i].data + (pinArray[resultHTMLList[i].idx]? ",1": ",0");
+			str += "&" + resultHTMLList[i].data + (pinArray[resultHTMLList[i].idx]? ",1": ",0") + "," + resultHTMLList[i].lv;
 		}
 	}
 	return str;
