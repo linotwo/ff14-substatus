@@ -830,10 +830,10 @@ function findGcdThreshold(ss, lv)
 	return [gcdPeriod, current, next];
 }
 
-function renderResult(idx, totalPoint, dot, gcd, cri, det, dh, ss, ratioDot, ratioGcd, ratioMix, derivativeDot, derivativeGcd, derivativeMix, unit, criRate, criDmg, dhRate, gcdStatus)
+function renderResult(idx, totalPoint, dot, gcd, cri, det, dh, ss, lv, ratioDot, ratioGcd, ratioMix, derivativeDot, derivativeGcd, derivativeMix, unit, criRate, criDmg, dhRate, gcdStatus)
 {
 	return "<table class='result_wrapper'>"
-		+ "<caption id='pin_button_" + idx + "' style='text-align: right;' onclick='pin_on_click(" + idx + ")'></caption>"
+		+ "<caption><td class='result_wrapper_cell' colspan='2' style='color: #574A30; font-size: 10pt;'><b>Level "+ lv +"</b></td><td class='result_wrapper_cell' style='text-align: right;'><span  id='pin_button_" + idx + "' onclick='pin_on_click(" + idx + ")'></span></td></caption>"
 		+ "<tbody>"
 		+ "<tr><td class='result_wrapper_cell' style='width: 100pt;'><table class='results'>"
 		+ "<tbody>"
@@ -939,7 +939,7 @@ function calc(dot, gcd, cri, det, dh, ss, pin, lv)
 	
 	gcdStatus = findGcdThreshold(ss, lv);
 	
-	resultHTML = renderResult(tempIdx, totalPoint, dot, gcd, cri, det, dh, ss, ratioDot, ratioGcd, ratioMix, derivativeDot, derivativeGcd, derivativeMix, unit, criRate, criDmg, dhRate, gcdStatus);
+	resultHTML = renderResult(tempIdx, totalPoint, dot, gcd, cri, det, dh, ss, lv, ratioDot, ratioGcd, ratioMix, derivativeDot, derivativeGcd, derivativeMix, unit, criRate, criDmg, dhRate, gcdStatus);
 
 	resultHTMLList.push({idx: tempIdx, html: resultHTML, data: genData(dot, gcd, cri, det, dh, ss), lv: lv});
 
